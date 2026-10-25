@@ -1,0 +1,11 @@
+[Unit]
+Description=blotter: board of Claude Code sessions for the e-ink work screen
+
+[Service]
+ExecStart=%h/.local/bin/blotterd
+# Listening on the Tailscale address fails until tailscaled is up after boot; keep trying.
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

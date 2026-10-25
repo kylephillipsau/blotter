@@ -1,0 +1,7 @@
+# blotter-hook config: ~/.config/blotter/hook.toml on each machine that runs Claude Code.
+
+url = "http://100.81.63.71:7340"
+token = ""
+# false: send no prompts or replies; state, tools, file names and commands still go.
+send_text = true
+# host = "macbook"   # default: the short hostname

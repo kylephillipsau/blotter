@@ -1,0 +1,14 @@
+# blotter config, read by blotterd and blotter: ~/.config/blotter/config.toml on the Pi.
+
+[feed]
+# The Pi's Tailscale address, so the feed never leaves the tailnet.
+listen = "100.81.63.71:7340"
+# Same token as the Mac's hook.toml. Generate one with: openssl rand -hex 32
+token = ""
+# state_file = "/home/kyle/.local/state/blotter/board.json"   # this is the default
+# Forget a session after this long without events (it crashed or was killed).
+forget_after = "24h"
+
+[panels.agents]
+# Mark a working or waiting session as stale after this long without events.
+stale_after = "30m"
