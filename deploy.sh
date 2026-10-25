@@ -1,8 +1,9 @@
 #!/bin/bash
 # Build and install blotter.
 #
-#   ./deploy.sh pi     sync the source to the Pi, build it there, install blotterd and blotter
-#                      in ~/.local/bin and (re)start the blotterd user service
+#   ./deploy.sh pi     sync the source to the Pi, build it there (binaries stay in
+#                      ~/blotter/target/release, as homelab's eink role expects) and restart
+#                      blotterd and the screen
 #   ./deploy.sh mac    install blotter-hook in ~/.local/bin on this Mac
 #
 # Configs are never overwritten; see config/*.example.toml.
@@ -18,9 +19,7 @@ case "$1" in
         ssh "$SSH_HOST" "set -e
             cd $REMOTE_DIR
             \$HOME/.cargo/bin/cargo build --release -p blotterd -p blotter 2>&1 | tail -3
-            target=\$(\$HOME/.cargo/bin/cargo metadata --format-version 1 --no-deps | python3 -c 'import json,sys; print(json.load(sys.stdin)[\"target_directory\"])')
-            mkdir -p ~/.local/bin ~/.config/systemd/user
-            install -m 755 \$target/release/blotterd \$target/release/blotter ~/.local/bin/
+            mkdir -p ~/.config/systemd/user
             install -m 644 systemd/blotterd.service ~/.config/systemd/user/
             systemctl --user daemon-reload
             if [ -f ~/.config/blotter/config.toml ]; then
@@ -29,7 +28,9 @@ case "$1" in
                 echo 'blotterd restarted'
             else
                 echo 'No ~/.config/blotter/config.toml yet: copy config/config.example.toml there'
-            fi"
+            fi
+            # sway reruns the screen when it exits, so this picks up the new build
+            pkill -x blotter && echo 'blotter screen restarted' || true"
         ;;
     mac)
         cargo install --quiet --path crates/blotter-hook --root "$HOME/.local" --force

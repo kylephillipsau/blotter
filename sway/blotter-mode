@@ -1,0 +1,30 @@
+#!/bin/bash
+# Switch the Classic between its two screens. Run by blotter-idle from inside sway.
+#
+#   blotter-mode idle   remember the current workspace, then show the dashboard (workspace 1)
+#   blotter-mode wake   if the dashboard is showing, go back to that workspace
+#                       (the work screen, workspace 2, if there is none to go back to)
+set -e
+
+state="${XDG_RUNTIME_DIR:-/tmp}/blotter-workspace"
+
+current() {
+    swaymsg -t get_workspaces -r |
+        python3 -c 'import json, sys; print(next(w["name"] for w in json.load(sys.stdin) if w["focused"]))'
+}
+
+case "$1" in
+    idle)
+        ws=$(current)
+        if [ "$ws" != 1 ]; then echo "$ws" > "$state"; fi
+        swaymsg -q workspace number 1
+        ;;
+    wake)
+        [ "$(current)" = 1 ] || exit 0
+        swaymsg -q workspace "$(cat "$state" 2>/dev/null || echo 2)"
+        ;;
+    *)
+        echo "usage: blotter-mode idle | wake" >&2
+        exit 1
+        ;;
+esac

@@ -1,4 +1,9 @@
-# blotter config, read by blotterd and blotter: ~/.config/blotter/config.toml on the Pi.
+# blotter config, read by blotterd, blotter and blotter-idle: ~/.config/blotter/config.toml on the Pi.
+
+[mode]
+# Show the dashboard after this long with no keys on the Classic. Any key brings the work
+# screen back. Read when sway starts.
+idle_after = "15m"
 
 [feed]
 # The Pi's Tailscale address, so the feed never leaves the tailnet.

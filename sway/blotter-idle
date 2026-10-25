@@ -1,0 +1,26 @@
+#!/bin/bash
+# Started by sway (exec): show the dashboard after [mode] idle_after with no keys, and go back
+# to the work screen on the next key.
+#
+# swayidle only reports activity after a timeout has fired, so a second, 5-second timeout
+# that does nothing makes sure a key always wakes the dashboard, even before the first
+# idle_after has passed (just after boot, or after switching to it by hand).
+here="$(dirname "$(readlink -f "$0")")"
+config="${XDG_CONFIG_HOME:-$HOME/.config}/blotter/config.toml"
+
+seconds=$(python3 - "$config" <<'EOF'
+import re, sys, tomllib
+try:
+    with open(sys.argv[1], "rb") as f:
+        value = tomllib.load(f).get("mode", {}).get("idle_after", "15m")
+except OSError:
+    value = "15m"
+m = re.fullmatch(r"\s*(\d+)\s*([smhd]?)\s*", str(value))
+n, unit = (int(m[1]), m[2]) if m else (15, "m")
+print(n * {"": 1, "s": 1, "m": 60, "h": 3600, "d": 86400}[unit])
+EOF
+)
+
+exec swayidle -w \
+    timeout "$seconds" "$here/blotter-mode idle" \
+    timeout 5 true resume "$here/blotter-mode wake"
